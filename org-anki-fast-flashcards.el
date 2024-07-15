@@ -83,33 +83,31 @@
      ((= (org-current-level) 1)
       (org-do-demote)))))
 
-
 (defun oaff-open-temp-buffer ()
   "Open the current heading as a flashcard editing buffer"
   (let ((original-buffer (current-buffer))
         (copied-content (current-kill 0))
-        (temp-buffer-name "*Org-anki-fast-flashcards Buffer*")
+        (temp-buffer-name "*org-anki-fast-flashcards*")
         (question (read-string "question?")))
 
     ;; Create and display the temporary buffer at the bottom
     (split-window-below)
     (other-window 1)
 
-    (with-current-buffer (org-get-buffer-create temp-buffer-name)
+    (with-current-buffer (get-buffer-create temp-buffer-name)
       (switch-to-buffer temp-buffer-name)
+      (ignore-errors (org-mode))
       (erase-buffer)
+
       ;; set modeline-format after org-mode is loaded, so that isn't overwritten
       (setq-local header-line-format "FLASHCARDS | `C-c C-c' to finish editing")
 
       (insert copied-content)
       (org-previous-visible-heading 1)
+      (end-of-line)
       (org-edit-headline question)
       (next-line)
-      (local-set-key (kbd "C-c C-c") 'oaff-close-temp-buffer)
-
-      ;;   ;; Store the original buffer as a buffer-local variable
-      ;; (setq-local my-original-buffer original-buffer)
-      )))
+      (local-set-key (kbd "C-c C-c") 'oaff-close-temp-buffer))))
 
 (defun oaff-close-temp-buffer ()
   "Close the flashcard buffer and yank the content to the Q&A heading"
